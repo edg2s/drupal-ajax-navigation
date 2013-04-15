@@ -90,6 +90,7 @@
 			var titleText = $( '<div/>' ).html( title ).text();
 			document.title = titleText;
 		}
+		$( options.wrapper ).trigger( 'ajax-update' );
 		// Track Google Analytics pageview
 		/*jshint nomen:false */
 		if( typeof _gaq !== 'undefined' ) {
