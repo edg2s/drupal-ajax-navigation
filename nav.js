@@ -41,7 +41,7 @@
 	 * Override menu click events
 	 */
 	function initMenu () {
-		$(options.menu).each( function() {
+		$( options.menu ).each( function() {
 			var path = ( $( this ).attr( 'pathname' ).substr( 0, 1 ) !== '/' ? '/' : '' ) + $( this ).attr( 'pathname' );
 			$( this ).click( function () {
 				History.pushState( null, null, path );
@@ -55,9 +55,7 @@
 	 * @param {string} path URL path to load
 	 */
 	function loadPage ( path ) {
-		if ( options.fade ) {
-			$( options.fade ).fadeOut( 'fast' );
-		}
+		$( options.wrapper ).trigger( 'ajaxupdatestart' );
 		if ( pageCache[path] ) {
 			$( options.wrapper ).html( pageCache[path].body );
 			writePage( pageCache[path].title, path );
@@ -79,9 +77,6 @@
 	 * @param {string} path URL path being loaded
 	 */
 	function writePage( title, path ) {
-		if ( options.fade ) {
-			$( options.fade ).hide().fadeIn( 'fast' );
-		}
 		// re-initialise the menu (not required if menu is not inside content)
 		initMenu();
 		try {
@@ -90,7 +85,7 @@
 			var titleText = $( '<div/>' ).html( title ).text();
 			document.title = titleText;
 		}
-		$( options.wrapper ).trigger( 'ajax-update' );
+		$( options.wrapper ).trigger( 'ajaxupdateend' );
 		// Track Google Analytics pageview
 		/*jshint nomen:false */
 		if( typeof _gaq !== 'undefined' ) {
@@ -109,6 +104,16 @@
 			'body': $( options.wrapper ).html(),
 			'title': $( 'title' ).html()
 		};
+
+		// Set up listeners for fade events
+		if ( options.fade ) {
+			$( options.wrapper ).bind( 'ajaxupdatestart', function() {
+				$( options.fade ).fadeOut( 'fast' );
+			} );
+			$( options.wrapper ).bind( 'ajaxupdateend', function() {
+				$( options.fade ).hide().fadeIn( 'fast' );
+			} );
+		}
 	} );
 
 } )( jQuery );
