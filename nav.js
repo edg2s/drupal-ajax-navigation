@@ -88,8 +88,9 @@ var drupalAjaxNavigation = {};
 	 * @returns {string} Relative path
 	 */
 	function relativePath ( path ) {
-		var a = $('<a>').attr( 'href', path );
-		return a.attr( 'pathname' ).replace( /^([^\/])/, '/$1' ) + a.attr( 'search' );
+		var a = $('<a>').attr( 'href', path ),
+			pathname = a.attr( 'pathname' );
+		return ( pathname.substr(1) !== '/' ? '/' : '' ) + pathname + a.attr( 'search' );
 	}
 
 	/**
