@@ -90,7 +90,7 @@ var drupalAjaxNavigation = {};
 	function relativePath ( path ) {
 		var a = $('<a>').attr( 'href', path ),
 			pathname = a.attr( 'pathname' );
-		return ( pathname.substr(1) !== '/' ? '/' : '' ) + pathname + a.attr( 'search' );
+		return ( pathname.substr( 0, 1 ) !== '/' ? '/' : '' ) + pathname + a.attr( 'search' );
 	}
 
 	/**
