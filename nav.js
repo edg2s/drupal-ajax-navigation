@@ -34,45 +34,86 @@ var drupalAjaxNavigation = {};
 	}
 
 	/**
-	 * Loads the page from the page cache or the 'net
+	 * Fetches the page and writes to the DOM
 	 *
 	 * @private
-	 * @param {string} path URL path to load
+	 * @param {string} path URL path
 	 */
 	function loadPage ( path ) {
 		$( options.wrapper ).trigger( 'ajaxupdatestart', [path] );
-		if ( pageCache[path] ) {
-			$( options.wrapper ).html( pageCache[path].contents );
-			writePage( pageCache[path].title, path );
-		} else {
-			$( options.wrapper ).load( path + ' ' + options.contents, function ( response ) {
-				var title = response.match( /<title>([^<]+)<\/title>/ )[1];
-				pageCache[path] = {
-					'contents': $( this ).html(),
-					'title': title
-				};
-				writePage( title, path );
-			} );
-		}
+		fetchPage(
+			path,
+			function () {
+				writePage( path );
+			},
+			function () {
+				$( options.wrapper ).trigger( 'ajaxupdateend', [path] );
+			}
+		);
 	}
 
 	/**
-	 * Writes the page data (contents & title) to the DOM
+	 * Fetch page data for path from cache or 'net
 	 *
 	 * @private
-	 * @param {string} title Page title
+	 * @param {string} path URL path
+	 * @param {Function} [success] Callback to run after fetch is complete
+	 * @param {Function} [failure] Callback to run if fetch fails
+	 */
+	function fetchPage ( path, success, failure ) {
+		if ( pageCache[path] ) {
+			if ( success ) {
+				success();
+			}
+			return;
+		}
+		$( '<div>' ).load( path + ' ' + options.contents, function ( response, result ) {
+			if ( result === 'success' ) {
+				cachePage(
+					path,
+					getBodyClass( response ),
+					$( this ).html(),
+					getTitle( response )
+				);
+				if ( success ) {
+					success();
+				}
+			} else if ( failure ) {
+				failure();
+			}
+		} );
+	}
+
+	/**
+	 * Writes the page data to the DOM
+	 *
+	 * @private
+	 * @private
 	 * @param {string} path URL path being loaded
 	 */
-	function writePage( title, path ) {
-		// re-initialise the menu (not required if menu is not inside content)
-		initMenu();
+	function writePage( path ) {
+		var page = pageCache[path];
+
+		// update body classes
+		$( 'body' ).attr( 'class', page.bodyClass );
+
+		// write contents inside wrapper
+		$( options.wrapper ).html( page.contents );
+
+		// update title
 		try {
-			$( 'title' ).html( title );
+			$( 'title' ).html( page.title );
 		} catch( e ) {
-			var titleText = $( '<div/>' ).html( title ).text();
+			var titleText = $( '<div/>' ).html( page.title ).text();
 			document.title = titleText;
 		}
-		$( options.wrapper ).trigger( 'ajaxupdateend', [path] );
+
+		// re-initialise the menu (not required if menu is not inside content)
+		initMenu();
+
+		// fire end event
+		$( options.wrapper ).trigger( 'ajaxupdateend', [path, page] );
+
 		// Track Google Analytics pageview
 		/*jshint nomen:false */
 		if( typeof _gaq !== 'undefined' ) {
@@ -91,6 +132,45 @@ var drupalAjaxNavigation = {};
 		var a = $('<a>').attr( 'href', path ),
 			pathname = a.attr( 'pathname' );
 		return ( pathname.substr( 0, 1 ) !== '/' ? '/' : '' ) + pathname + a.attr( 'search' );
+	}
+
+	/**
+	 * Cache a page in the page cache
+	 *
+	 * @private
+	 * @param {string} path URL path
+	 * @param {string} bodyClass Body tag classes
+	 * @param {string} contents Content HTML section
+	 * @param {string} title HTML title
+	 */
+	function cachePage ( path, bodyClass, contents, title ) {
+		pageCache[path] = {
+			'bodyClass': bodyClass,
+			'contents': contents,
+			'title': title
+		};
+	}
+
+	/**
+	 * Get the body tag's classes from an HTML string
+	 *
+	 * @private
+	 * @param {string} html Document HTML
+	 * @returns {string} Classes of the body tag
+	 */
+	function getBodyClass( html ) {
+		return $( html.match( /<body([^>]+)>/ )[0].replace( '<body', '<div' ) ).attr( 'class' );
+	}
+
+	/**
+	 * Get the title HTML contents from an HTML string
+	 *
+	 * @private
+	 * @param {string} html Document HTML
+	 * @returns {string} Title
+	 */
+	function getTitle( html ) {
+		return html.match( /<title>([^<]+)<\/title>/ )[1];
 	}
 
 	/**
@@ -120,10 +200,12 @@ var drupalAjaxNavigation = {};
 				var state = History.getState();
 				loadPage( relativePath( state.url ) );
 			} );
-			pageCache[relativePath( History.getState().url )] = {
-				'contents': $( options.wrapper ).html(),
-				'title': $( 'title' ).html()
-			};
+			cachePage(
+				relativePath( History.getState().url ),
+				$( 'body' ).attr( 'class' ),
+				$( options.wrapper ).html(),
+				$( 'title' ).html()
+			);
 		} );
 	};
 
@@ -146,14 +228,6 @@ var drupalAjaxNavigation = {};
 	 * @param {string} path URL path to load
 	 */
 	drupalAjaxNavigation.preCachePath = function ( path ) {
-		if ( !pageCache[path] ) {
-			$( '<div>' ).load( path + ' ' + options.contents, function ( response ) {
-				var title = response.match( /<title>([^<]+)<\/title>/ )[1];
-				pageCache[path] = {
-					'contents': $( this ).html(),
-					'title': title
-				};
-			} );
-		}
+		fetchPage( path );
 	};
 } )( jQuery );
