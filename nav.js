@@ -47,6 +47,7 @@ var drupalAjaxNavigation = {};
 				writePage( path );
 			},
 			function () {
+				// Failure
 				$( options.wrapper ).trigger( 'ajaxupdateend', [path] );
 			}
 		);
@@ -113,6 +114,8 @@ var drupalAjaxNavigation = {};
 
 		// fire end event
 		$( options.wrapper ).trigger( 'ajaxupdateend', [path, page] );
+		// fire Drupal events
+		Drupal.attachBehaviors( options.contents );
 
 		// Track Google Analytics pageview
 		/*jshint nomen:false */
