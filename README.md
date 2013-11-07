@@ -1,4 +1,4 @@
-drupal-ajax-navigation
+Drupal 7 ajax navigation
 ======================
 
 <http://semplicewebsites.com/drupal-7-ajax-page-navigation>
@@ -8,13 +8,11 @@ Add basic ajax page navigation support to Drupal 7
 Installation
 ============
 
-Install Drupal 7 and the History.js module:
-
-<https://drupal.org/project/history_js>
+Install [Drupal 7](https://drupal.org) and the [History.js module](https://drupal.org/project/history_js)
 
 Add nav.js to your theme's JS folder and .info file.
 
-Add the initialisation code below your script.js/global.js file if you don't already have one.
+Add the initialisation code below to your script.js/global.js file if you don't already have one.
 
 Usage
 =====
