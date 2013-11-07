@@ -7,6 +7,8 @@
  * GPLv3
  */
 
+/* global Drupal */
+
 var drupalAjaxNavigation = {};
 
 ( function ( $ ) {
@@ -23,7 +25,7 @@ var drupalAjaxNavigation = {};
 	 *
 	 * @private
 	 */
-	function initMenu () {
+	function initMenu() {
 		$( options.menu ).each( function() {
 			var path = relativePath( $( this ).attr( 'pathname' ) );
 			$( this ).click( function () {
@@ -39,7 +41,7 @@ var drupalAjaxNavigation = {};
 	 * @private
 	 * @param {string} path URL path
 	 */
-	function loadPage ( path ) {
+	function loadPage( path ) {
 		$( options.wrapper ).trigger( 'ajaxupdatestart', [path] );
 		fetchPage(
 			path,
@@ -61,7 +63,7 @@ var drupalAjaxNavigation = {};
 	 * @param {Function} [success] Callback to run after fetch is complete
 	 * @param {Function} [failure] Callback to run if fetch fails
 	 */
-	function fetchPage ( path, success, failure ) {
+	function fetchPage( path, success, failure ) {
 		if ( pageCache[path] ) {
 			if ( success ) {
 				success();
@@ -105,7 +107,7 @@ var drupalAjaxNavigation = {};
 		try {
 			$( 'title' ).html( page.title );
 		} catch( e ) {
-			var titleText = $( '<div/>' ).html( page.title ).text();
+			var titleText = $( '<div>' ).html( page.title ).text();
 			document.title = titleText;
 		}
 
@@ -119,20 +121,20 @@ var drupalAjaxNavigation = {};
 
 		// Track Google Analytics pageview
 		/*jshint nomen:false */
-		if( typeof _gaq !== 'undefined' ) {
+		if ( typeof _gaq !== 'undefined' ) {
 			_gaq.push( ['_trackPageview', path] );
 		}
 	}
 
 	/**
-	 * Get a normalised relative path (always with a leading /)
+	 * Get a normalised relative path (always with a leading '/')
 	 *
 	 * @private
 	 * @param {string} path URL path
 	 * @returns {string} Relative path
 	 */
-	function relativePath ( path ) {
-		var a = $('<a>').attr( 'href', path ),
+	function relativePath( path ) {
+		var a = $( '<a>' ).attr( 'href', path ),
 			pathname = a.attr( 'pathname' );
 		return ( pathname.substr( 0, 1 ) !== '/' ? '/' : '' ) + pathname + a.attr( 'search' );
 	}
@@ -146,7 +148,7 @@ var drupalAjaxNavigation = {};
 	 * @param {string} contents Content HTML section
 	 * @param {string} title HTML title
 	 */
-	function cachePage ( path, bodyClass, contents, title ) {
+	function cachePage( path, bodyClass, contents, title ) {
 		pageCache[path] = {
 			'bodyClass': bodyClass,
 			'contents': contents,
@@ -180,10 +182,10 @@ var drupalAjaxNavigation = {};
 	 * Initialise ajax navigation
 	 *
 	 * @public
-	 * @param {Object} o Options
-	 * @param {string} o.wrapper Selector for the element which wraps the content to be updated
-	 * @param {string} o.contents Selector for the content to be updated
-	 * @param {string} o.menu Selector for links which trigger ajax navigation
+	 * @param {Object} [o] Options
+	 * @param {string} [o.wrapper] Selector for the element which wraps the content to be updated
+	 * @param {string} [o.contents] Selector for the content to be updated
+	 * @param {string} [o.menu] Selector for links which trigger ajax navigation
 	 */
 	drupalAjaxNavigation.init = function ( o ) {
 		if ( !History.enabled ) {
@@ -216,7 +218,7 @@ var drupalAjaxNavigation = {};
 	 * Load pages into the local page cache from a selection of links
 	 *
 	 * @public
-	 * @param {string} select Selector for anchor tags
+	 * @param {string} selector Selector for anchor tags
 	 */
 	drupalAjaxNavigation.preCacheLinks = function ( selector ) {
 		$( selector ).each( function () {

@@ -21,7 +21,6 @@
 	"strict": false,
 	"trailing": true,
 
-	"es5": true,
 	"multistr": true,
 	"smarttabs": true,
 
